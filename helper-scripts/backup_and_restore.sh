@@ -168,6 +168,8 @@ function backup() {
     esac
     shift
   done
+  rm ${BACKUP_LOCATION}/latest > /dev/null
+  ln -s ${BACKUP_LOCATION}/mailcow-${DATE} ${BACKUP_LOCATION}/latest
 }
 
 function restore() {
