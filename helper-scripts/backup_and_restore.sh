@@ -168,8 +168,10 @@ function backup() {
     esac
     shift
   done
+  #uhaas begin
   rm ${BACKUP_LOCATION}/latest > /dev/null
   ln -s ${BACKUP_LOCATION}/mailcow-${DATE} ${BACKUP_LOCATION}/latest
+  #uhaas end
 }
 
 function restore() {
