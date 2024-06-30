@@ -7,3 +7,4 @@ disable_monitoring = true;
 # instead of silently accepting the message without further processing.
 soft_reject_on_timeout = true;
 local_addrs = /etc/rspamd/custom/mailcow_networks.map;
+max_message = 500MB;
