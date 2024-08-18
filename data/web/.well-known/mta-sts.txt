@@ -1,5 +1,0 @@
-version: STSv1
-mode: enforce
-mx: pi.post44.de
-mx: *.post44.de
-max_age: 60

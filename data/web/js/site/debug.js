@@ -325,7 +325,10 @@ jQuery(function($){
           title: 'URI',
           data: 'uri',
           defaultContent: '',
-          className: 'dtr-col-md dtr-break-all'
+          className: 'dtr-col-md dtr-break-all',
+          render: function (data, type) {
+            return escapeHtml(data);
+          }
         },
         {
           title: 'Method',
@@ -944,7 +947,7 @@ jQuery(function($){
               "data-order": cellData.sortBy,
               "data-sort": cellData.sortBy
             });
-          },
+          },    
           render: function (data) {
             return data.value;
           }
@@ -969,7 +972,7 @@ jQuery(function($){
               "data-order": cellData.sortBy,
               "data-sort": cellData.sortBy
             });
-          },
+          },    
           render: function (data) {
             return data.value;
           }
