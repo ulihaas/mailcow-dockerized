@@ -352,6 +352,7 @@ adapt_new_options() {
   "SPAMHAUS_DQS_KEY"
   "SKIP_UNBOUND_HEALTHCHECK"
   "DISABLE_NETFILTER_ISOLATION_RULE"
+  "HTTP_REDIRECT"
   )
 
   sed -i --follow-symlinks '$a\' mailcow.conf
@@ -637,6 +638,12 @@ adapt_new_options() {
         echo '# Prevent netfilter from setting an iptables/nftables rule to isolate the mailcow docker network - y/n' >> mailcow.conf
         echo '# CAUTION: Disabling this may expose container ports to other neighbors on the same subnet, even if the ports are bound to localhost' >> mailcow.conf
         echo 'DISABLE_NETFILTER_ISOLATION_RULE=n' >> mailcow.conf
+      fi
+    elif [[ ${option} == "HTTP_REDIRECT" ]]; then
+      if ! grep -q ${option} mailcow.conf; then
+        echo "Adding new option \"${option}\" to mailcow.conf"
+        echo '# Redirect HTTP connections to HTTPS - y/n' >> mailcow.conf
+        echo 'HTTP_REDIRECT=n' >> mailcow.conf
       fi
     elif ! grep -q ${option} mailcow.conf; then
       echo "Adding new option \"${option}\" to mailcow.conf"
@@ -1485,9 +1492,6 @@ if [ ${BRANCH} == "master" ]; then
 elif [ ${BRANCH} == "nightly" ]; then
   mailcow_git_version=$(git rev-parse --short $(git rev-parse @{upstream}))
   mailcow_last_git_version=""
-elif [ ${BRANCH} == "Post44" ]; then
-  mailcow_git_version=$(git describe --tags $(git rev-list --tags --max-count=1))
-
 else
   mailcow_git_version=$(git rev-parse --short HEAD)
   mailcow_last_git_version=""
