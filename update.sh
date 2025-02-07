@@ -1492,6 +1492,9 @@ if [ ${BRANCH} == "master" ]; then
 elif [ ${BRANCH} == "nightly" ]; then
   mailcow_git_version=$(git rev-parse --short $(git rev-parse @{upstream}))
   mailcow_last_git_version=""
+elif [ ${BRANCH} == "Post44" ]; then
+  mailcow_git_version=$(git describe --tags $(git rev-list --tags --max-count=1))
+
 else
   mailcow_git_version=$(git rev-parse --short HEAD)
   mailcow_last_git_version=""
