@@ -1,0 +1,5 @@
+version: STSv1
+mode: enforce
+max_age: 15552000
+mx: pi.post44.de
+mx: *.post44.de
