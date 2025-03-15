@@ -36,12 +36,18 @@ docker_garbage() {
   IMGS_TO_DELETE=()
 
   declare -A IMAGES_INFO
-  COMPOSE_IMAGES=($(grep -oP "image: \Kmailcow.+" "${SCRIPT_DIR}/docker-compose.yml"))
+  COMPOSE_IMAGES=($(grep -oP "image: \K(ghcr\.io/)?mailcow.+" "${SCRIPT_DIR}/docker-compose.yml"))
 
-  for existing_image in $(docker images --format "{{.ID}}:{{.Repository}}:{{.Tag}}" | grep 'mailcow/'); do
+  for existing_image in $(docker images --format "{{.ID}}:{{.Repository}}:{{.Tag}}" | grep -E '(mailcow/|ghcr\.io/mailcow/)'); do
       ID=$(echo "$existing_image" | cut -d ':' -f 1)
       REPOSITORY=$(echo "$existing_image" | cut -d ':' -f 2)
       TAG=$(echo "$existing_image" | cut -d ':' -f 3)
+
+      if [[ "$REPOSITORY" == "mailcow/backup" || "$REPOSITORY" == "ghcr.io/mailcow/backup" ]]; then
+          if [[ "$TAG" != "<none>" ]]; then
+              continue
+          fi
+      fi
 
       if [[ " ${COMPOSE_IMAGES[@]} " =~ " ${REPOSITORY}:${TAG} " ]]; then
           continue
@@ -57,7 +63,7 @@ docker_garbage() {
           echo "    ${IMAGES_INFO[$id]} ($id)"
       done
 
-      if [ ! $FORCE ]; then
+      if [ -z "$FORCE" ]; then
           read -r -p "Do you want to delete them to free up some space? [y/N] " response
           if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
               docker rmi ${IMGS_TO_DELETE[*]}
@@ -710,6 +716,44 @@ migrate_solr_config_options() {
   fi
 }
 
+detect_major_update() {
+  if [ ${BRANCH} == "master" ]; then
+    # Array with major versions
+    # Add major versions here
+    MAJOR_VERSIONS=(
+      "2025-02"
+    )
+
+    current_version=$(git describe --tags $(git rev-list --tags --max-count=1))
+    release_url="https://github.com/mailcow/mailcow-dockerized/releases/tag"
+
+    updates_to_apply=()
+
+    for version in "${MAJOR_VERSIONS[@]}"; do
+      if [[ "$current_version" < "$version" ]]; then
+        updates_to_apply+=("$version")
+      fi
+    done
+
+    if [[ ${#updates_to_apply[@]} -gt 0 ]]; then
+      echo -e "\e[33m\nMAJOR UPDATES to be applied:\e[0m"
+      for update in "${updates_to_apply[@]}"; do
+        echo "$update - $release_url/$update"
+      done
+
+      echo -e "\n⚠️  Please read the release notes before proceeding.\n"
+
+      read -p "Do you want to proceed with the update? [y/n] " response
+      if [[ "${response}" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+        echo "Proceeding with the update..."
+      else
+        echo "Update canceled. Exiting."
+        exit 1
+      fi
+    fi
+  fi
+}
+
 ############## End Function Section ##############
 
 # Check permissions
@@ -1345,6 +1389,7 @@ if [ ! "$FORCE" ]; then
     echo "OK, exiting."
     exit 0
   fi
+  detect_major_update
   migrate_docker_nat
 fi
 
