@@ -6,28 +6,28 @@ services:
       traefik.enable: "true"
       traefik.http.routers.nginx-mailcow-secure.entrypoints: websecure
       traefik.http.routers.nginx-mailcow-secure.middlewares: default@file
-      traefik.http.routers.nginx-mailcow-secure.rule: "Host(`pi.post44.de`) || Host(`autodiscover.post44.de`) || Host(`autoconfig.post44.de`) || Host(`mta-sts.post44.de`)"
+      traefik.http.routers.nginx-mailcow-secure.rule: "Host(`pi.post44.de`) || Host(`mail.post44.de`) || Host(`autodiscover.post44.de`) || Host(`autoconfig.post44.de`) || Host(`mta-sts.post44.de`)"
       traefik.http.routers.nginx-mailcow-secure.service: nginx-mailcow
       traefik.http.routers.nginx-mailcow-secure.tls: "true"
       traefik.http.routers.nginx-mailcow-secure.tls.certresolver: http_resolver
       traefik.http.routers.nginx-mailcow.entrypoints: web
-      traefik.http.routers.nginx-mailcow.rule: "Host(`pi.post44.de`) || Host(`autodiscover.post44.de`) || Host(`autoconfig.post44.de`) || Host(`mta-sts.post44.de`)"
+      traefik.http.routers.nginx-mailcow.rule: "Host(`pi.post44.de`) || Host(`mail.post44.de`) || Host(`autodiscover.post44.de`) || Host(`autoconfig.post44.de`) || Host(`mta-sts.post44.de`)"
       traefik.http.services.nginx-mailcow.loadbalancer.server.port: "80"
 
 ## Webmail Addprefix to Sogo
-      traefik.http.routers.webmail_secure.rule:  "Host(`mail.post44.de`)"
-      traefik.http.routers.webmail_secure.entrypoints: websecure
-      traefik.http.routers.webmail_secure.tls: "true"
-      traefik.http.routers.webmail_secure.tls.certresolver: http_resolver
-      traefik.http.routers.webmail_secure.middlewares: webmail_addprefix_sogo
-      traefik.http.routers.webmail_secure.service: nginx-mailcow
-      traefik.http.middlewares.webmail_addprefix_sogo.addprefix.prefix: "/SOGo"  
+#      traefik.http.routers.webmail_secure.rule:  "Host(`mail.post44.de`)"
+#      traefik.http.routers.webmail_secure.entrypoints: websecure
+#      traefik.http.routers.webmail_secure.tls: "true"
+#      traefik.http.routers.webmail_secure.tls.certresolver: http_resolver
+#      traefik.http.routers.webmail_secure.middlewares: webmail_addprefix_sogo
+#      traefik.http.routers.webmail_secure.service: nginx-mailcow
+#      traefik.http.middlewares.webmail_addprefix_sogo.addprefix.prefix: "/SOGo"  
 ## Webmail Sogo Static Resources
-      traefik.http.routers.webmail_static_secure.rule: "Host(`mail.post44.de`) && PathPrefix(`/SOGo`)"
-      traefik.http.routers.webmail_static_secure.entrypoints: websecure
-      traefik.http.routers.webmail_static_secure.tls: "true"
-      traefik.http.routers.webmail_static_secure.tls.certresolver: http_resolver
-      traefik.http.routers.webmail_static_secure.service: nginx-mailcow
+#      traefik.http.routers.webmail_static_secure.rule: "Host(`mail.post44.de`) && PathPrefix(`/SOGo`)"
+#      traefik.http.routers.webmail_static_secure.entrypoints: websecure
+#      traefik.http.routers.webmail_static_secure.tls: "true"
+#      traefik.http.routers.webmail_static_secure.tls.certresolver: http_resolver
+#      traefik.http.routers.webmail_static_secure.service: nginx-mailcow
 
 
     networks:
