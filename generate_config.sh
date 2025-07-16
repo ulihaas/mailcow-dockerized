@@ -382,6 +382,10 @@ SKIP_UNBOUND_HEALTHCHECK=n
 
 SKIP_CLAMD=${SKIP_CLAMD}
 
+# Skip Olefy (olefy-mailcow) anti-virus for Office documents (Rspamd will auto-detect a missing Olefy container) - y/n
+
+SKIP_OLEFY=n
+
 # Skip SOGo: Will disable SOGo integration and therefore webmail, DAV protocols and ActiveSync support (experimental, unsupported, not fully implemented) - y/n
 
 SKIP_SOGO=n
@@ -493,13 +497,6 @@ SOGO_EXPIRE_SESSION=480
 DOVECOT_MASTER_USER=
 # LEAVE EMPTY IF UNSURE
 DOVECOT_MASTER_PASS=
-
-# Let's Encrypt registration contact information
-# Optional: Leave empty for none
-# This value is only used on first order!
-# Setting it at a later point will require the following steps:
-# https://docs.mailcow.email/troubleshooting/debug-reset_tls/
-ACME_CONTACT=
 
 # WebAuthn device manufacturer verification
 # After setting WEBAUTHN_ONLY_TRUSTED_VENDORS=y only devices from trusted manufacturers are allowed

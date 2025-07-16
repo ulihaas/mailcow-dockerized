@@ -323,6 +323,7 @@ adapt_new_options() {
   "WATCHDOG_EXTERNAL_CHECKS"
   "WATCHDOG_SUBJECT"
   "SKIP_CLAMD"
+  "SKIP_OLEFY"
   "SKIP_IP_CHECK"
   "ADDITIONAL_SAN"
   "DOVEADM_PORT"
@@ -352,7 +353,6 @@ adapt_new_options() {
   "DOVECOT_MASTER_PASS"
   "MAILCOW_PASS_SCHEME"
   "ADDITIONAL_SERVER_NAMES"
-  "ACME_CONTACT"
   "WATCHDOG_VERBOSE"
   "WEBAUTHN_ONLY_TRUSTED_VENDORS"
   "SPAMHAUS_DQS_KEY"
@@ -598,16 +598,6 @@ adapt_new_options() {
         echo '# Comma separated list without spaces! Example: ADDITIONAL_SERVER_NAMES=a.b.c,d.e.f' >> mailcow.conf
         echo 'ADDITIONAL_SERVER_NAMES=' >> mailcow.conf
       fi
-    elif [[ ${option} == "ACME_CONTACT" ]]; then
-      if ! grep -q ${option} mailcow.conf; then
-        echo "Adding new option \"${option}\" to mailcow.conf"
-        echo '# Lets Encrypt registration contact information' >> mailcow.conf
-        echo '# Optional: Leave empty for none' >> mailcow.conf
-        echo '# This value is only used on first order!' >> mailcow.conf
-        echo '# Setting it at a later point will require the following steps:' >> mailcow.conf
-        echo '# https://docs.mailcow.email/troubleshooting/debug-reset_tls/' >> mailcow.conf
-        echo 'ACME_CONTACT=' >> mailcow.conf
-      fi
     elif [[ ${option} == "WEBAUTHN_ONLY_TRUSTED_VENDORS" ]]; then
       if ! grep -q ${option} mailcow.conf; then
         echo "Adding new option \"${option}\" to mailcow.conf"
@@ -760,6 +750,27 @@ detect_major_update() {
   fi
 }
 
+remove_obsolete_options() {
+  OBSOLETE_OPTIONS=(
+    "ACME_CONTACT"
+  )
+
+  for option in "${OBSOLETE_OPTIONS[@]}"; do
+    if [[ "$option" == "ACME_CONTACT" ]]; then
+      sed -i '/^# Lets Encrypt registration contact information/d' mailcow.conf
+      sed -i "/^# Let's Encrypt registration contact information/d" mailcow.conf
+      sed -i '/^# Optional: Leave empty for none/d' mailcow.conf
+      sed -i '/^# This value is only used on first order!/d' mailcow.conf
+      sed -i '/^# Setting it at a later point will require the following steps:/d' mailcow.conf
+      sed -i '/^# https:\/\/docs.mailcow.email\/troubleshooting\/debug-reset_tls\//d' mailcow.conf
+      sed -i '/^ACME_CONTACT=.*/d' mailcow.conf
+      sed -i '/^#ACME_CONTACT=.*/d' mailcow.conf
+    else
+      sed -i "/^${option}=.*/d" mailcow.conf
+      sed -i "/^#${option}=.*/d" mailcow.conf
+    fi
+  done
+}
 ############## End Function Section ##############
 
 # Check permissions
@@ -967,6 +978,7 @@ CONFIG_ARRAY=(
   "WATCHDOG_EXTERNAL_CHECKS"
   "WATCHDOG_SUBJECT"
   "SKIP_CLAMD"
+  "SKIP_OLEFY"
   "SKIP_IP_CHECK"
   "ADDITIONAL_SAN"
   "AUTODISCOVER_SAN"
@@ -994,7 +1006,6 @@ CONFIG_ARRAY=(
   "DOVECOT_MASTER_PASS"
   "MAILCOW_PASS_SCHEME"
   "ADDITIONAL_SERVER_NAMES"
-  "ACME_CONTACT"
   "WATCHDOG_VERBOSE"
   "WEBAUTHN_ONLY_TRUSTED_VENDORS"
   "SPAMHAUS_DQS_KEY"
@@ -1230,17 +1241,6 @@ for option in "${CONFIG_ARRAY[@]}"; do
       echo '# in the reverse proxy.' >> mailcow.conf
       echo 'AUTODISCOVER_SAN=y' >> mailcow.conf
     fi
-
-  elif [[ "${option}" == "ACME_CONTACT" ]]; then
-    if ! grep -q "${option}" mailcow.conf; then
-      echo "Adding new option \"${option}\" to mailcow.conf"
-      echo '# Lets Encrypt registration contact information' >> mailcow.conf
-      echo '# Optional: Leave empty for none' >> mailcow.conf
-      echo '# This value is only used on first order!' >> mailcow.conf
-      echo '# Setting it at a later point will require the following steps:' >> mailcow.conf
-      echo '# https://docs.mailcow.email/troubleshooting/debug-reset_tls/' >> mailcow.conf
-      echo 'ACME_CONTACT=' >> mailcow.conf
-    fi
   elif [[ "${option}" == "WEBAUTHN_ONLY_TRUSTED_VENDORS" ]]; then
     if ! grep -q "${option}" mailcow.conf; then
       echo "Adding new option \"${option}\" to mailcow.conf"
@@ -1277,6 +1277,18 @@ for option in "${CONFIG_ARRAY[@]}"; do
       echo '# Prevent netfilter from setting an iptables/nftables rule to isolate the mailcow docker network - y/n' >> mailcow.conf
       echo '# CAUTION: Disabling this may expose container ports to other neighbors on the same subnet, even if the ports are bound to localhost' >> mailcow.conf
       echo 'DISABLE_NETFILTER_ISOLATION_RULE=n' >> mailcow.conf
+    fi
+  elif [[ "${option}" == "SKIP_CLAMD" ]]; then
+    if ! grep -q "${option}" mailcow.conf; then
+      echo "Adding new option \"${option}\" to mailcow.conf"
+      echo '# Skip ClamAV (clamd-mailcow) anti-virus (Rspamd will auto-detect a missing ClamAV container) - y/n' >> mailcow.conf
+      echo 'SKIP_CLAMD=n' >> mailcow.conf
+    fi
+  elif [[ "${option}" == "SKIP_OLEFY" ]]; then
+    if ! grep -q "${option}" mailcow.conf; then
+      echo "Adding new option \"${option}\" to mailcow.conf"
+      echo '# Skip Olefy (olefy-mailcow) anti-virus for Office documents (Rspamd will auto-detect a missing Olefy container) - y/n' >> mailcow.conf
+      echo 'SKIP_OLEFY=n' >> mailcow.conf
     fi
   elif [[ "${option}" == "REDISPASS" ]]; then
     if ! grep -q "${option}" mailcow.conf; then
@@ -1474,6 +1486,7 @@ done
 [[ -f data/conf/nginx/ZZZ-ejabberd.conf ]] && rm data/conf/nginx/ZZZ-ejabberd.conf
 migrate_solr_config_options
 adapt_new_options
+remove_obsolete_options
 
 # Silently fixing remote url from andryyy to mailcow
 # git remote set-url origin https://github.com/mailcow/mailcow-dockerized
