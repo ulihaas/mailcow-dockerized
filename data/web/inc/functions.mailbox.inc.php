@@ -1115,8 +1115,6 @@ function mailbox($_action, $_type, $_data = null, $_extra = null) {
           $attribute_hash = (!empty($_data['attribute_hash'])) ? $_data['attribute_hash'] : '';
           if (in_array($authsource, array('keycloak', 'generic-oidc', 'ldap'))){
             $force_pw_update = 0;
-          }
-          if ($authsource == 'generic-oidc'){
             $force_tfa = 0;
           }
           $mailbox_attrs = json_encode(
@@ -3128,8 +3126,6 @@ function mailbox($_action, $_type, $_data = null, $_extra = null) {
               }
               if (in_array($authsource, array('keycloak', 'generic-oidc', 'ldap'))){
                 $force_pw_update = 0;
-              }
-              if ($authsource == 'generic-oidc'){
                 $force_tfa = 0;
               }
               $pw_recovery_email    = (isset($_data['pw_recovery_email']) && $authsource == 'mailcow') ? $_data['pw_recovery_email'] : $is_now['attributes']['recovery_email'];
